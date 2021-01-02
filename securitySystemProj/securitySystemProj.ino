@@ -1,8 +1,11 @@
 #include <Wire.h> 
 #include <LiquidCrystal_I2C.h>
+#include<SoftwareSerial.h>
 #include <Keypad.h>
 
 #define Password_Length 5 
+
+SoftwareSerial s(2, 3);
 
 char Data[Password_Length]; 
 char Master[Password_Length] = "123*"; 
@@ -27,6 +30,7 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 void setup(){
   Serial.begin(9600);
+  SoftwareSerial s(2, 3);
   lcd.init(); 
   lcd.backlight();
 }
@@ -66,6 +70,7 @@ void enterPassword()
     if(wrong_count == 4){
       lcd.clear();
       lcd.print("ALARM!");
+      s.write(1); 
       delay(3000);
       wrong_count = 0;
     }

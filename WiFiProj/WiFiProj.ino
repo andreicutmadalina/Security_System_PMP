@@ -1,5 +1,7 @@
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WiFi.h>
+#include <SoftwareSerial.h>
+SoftwareSerial s(D6,D5);
 
 const char* ssid = "TP-Link_1DD0";
 const char* password = "92921504";
@@ -27,7 +29,15 @@ void setup()
 
 void loop()
 { 
-   if (get_http(String("wrong_code")) != 0);    
+   if (s.available()>0)
+    {
+      data=s.read();
+      Serial.print(data);
+      if(data == 1) //wrong code
+        {
+          if (get_http(String("wrong_code")) != 0);
+        }
+    }  
 }
 
 int get_http(String state)
