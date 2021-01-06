@@ -5,7 +5,7 @@
 
 #define Password_Length 5 
 
-SoftwareSerial s(2, 3);
+SoftwareSerial s(2, 3); //definim pinii 2,3 pt comunicare seriala
 
 char Data[Password_Length]; 
 char Master[Password_Length] = "123*"; 
@@ -43,6 +43,12 @@ void setup(){
   lcd.backlight();
 }
 
+/*
+    - avem un buton pe post de ring button
+    - la apasarea acestuia, proprietarul va primi o notificare pe telefon
+    - pentru a sti ca trebuie trimisa notificare cu prezenta unei perosane la usa, se va trimite valoare 2
+      
+ */
 void debounce()
 {
   int buttonState = digitalRead(buttonPin);
@@ -51,7 +57,7 @@ void debounce()
       lastPressedTime = millis();
       if( buttonState == 0 && lastButtonState == 1) //if the button is now pressed and the last time was released
         {
-            s.write(2); 
+            s.write(2); //cineva este la usa
             lastButtonState = 0;
         }
       
@@ -69,6 +75,17 @@ void loop()
 }
 
 void enterPassword()
+/*
+    - metoda enterPassword verifica parola(codul) introdus de o persoana 
+    - customKey selecteaza tasta apasata 
+    - dataCount  contorizeaza tastele apasate
+    - Data = tastele apasate, Master = combinatia corecta a tastelor
+    - daca s-a apasat un numar de taste identic cu lungimea codului -> verificare corectitudine combinatie introdusa
+    - combinatie corecta -> mesaj lcd succes
+    - combinatie incorecta -> serial communication esp8266
+                           -> se trimite valoarea 1 la modulul wifi
+                           -> la receptia acestei valori, se va trimite mesajul corespunzator
+*/
 {
   lcd.setCursor(0,0);
   lcd.print("Enter Password:");
@@ -98,7 +115,7 @@ void enterPassword()
     if(wrong_count == 4){
       lcd.clear();
       lcd.print("ALARM!");
-      s.write(1); 
+      s.write(1); //cod 1 = cineva a incercat sa patrunda in casa
       delay(3000);
       wrong_count = 0;
     }
@@ -108,6 +125,10 @@ void enterPassword()
   }
 }
 
+/*
+    - sterge valorile tastate
+    - reseteaza contorul cifrelor tastate
+ */
 void clearData(){
   while(data_count !=0){
     Data[data_count--] = 0; 
