@@ -3,10 +3,7 @@
 #include <SoftwareSerial.h>
 SoftwareSerial s(D6,D5);
 
-bool brokenHouse = false;
-bool doorbell = false;
-
-int status = WL_IDLE_STATUS; //not required.
+int status = WL_IDLE_STATUS;
 int data;
 const char* ssid = "TP-Link_1DD0";
 const char* password = "92921504";
@@ -18,6 +15,7 @@ void setup()
   s.begin(9600);
   Serial.println();
 
+  //conectare wifi----------------------------
   Serial.println("try");
   WiFi.begin(ssid, password);
 
@@ -31,9 +29,16 @@ void setup()
 
   Serial.print("Connected, IP address: ");
   Serial.println(WiFi.localIP());
+  //-----------------------------------------
 }
 
 void loop()
+/*
+ *   - comunicare seriala cu placuta arduino uno
+ *   - se primesc valorile trimise din celalalt fisier sursa
+ *   - daca s-a primit 1 -> trebuie instiintat proprietarul cu privire la faptul ca e posibil ca cineva sa incerce sa patrunda in casa
+ *   - daca s-a primit 2 -> cineva a apasat pe sonerie -> proprietarul trebuie instiintat cu privire la prezenta unei persoane la usa
+ */
 {
     if (s.available()>0)
     {
@@ -50,6 +55,11 @@ void loop()
     }
 }
 
+/*
+   - trimitere mesaj pentru cazul greserii codului de 4 ori consecutiv
+   - intai se creeaza evenimentul de notificare in IFTTT
+   - se copiaza link-ul generat pentru acel eveniment si se realizeaza conexiunea
+*/
 int get_http(String state)
 {
     HTTPClient http;
@@ -74,13 +84,18 @@ int get_http(String state)
     } else {
         ret = -1;
         Serial.printf("[HTTP] GET failed, error: %s\n", http.errorToString(httpCode).c_str());
-        delay(500); // wait for half sec before retry again
+        delay(500);
     }
 
     http.end();
     return ret;
 }
 
+/*
+   - trimitere mesaj pentru cazul apasarii soneriei
+   - intai se creeaza evenimentul de notificare in IFTTT
+   - se copiaza link-ul generat pentru acel eveniment si se realizeaza conexiunea
+*/
 int get_httpDoorbell(String state)
 {
     HTTPClient http;
@@ -105,7 +120,7 @@ int get_httpDoorbell(String state)
     } else {
         ret = -1;
         Serial.printf("[HTTP] GET failed, error: %s\n", http.errorToString(httpCode).c_str());
-        delay(500); // wait for half sec before retry again
+        delay(500); 
     }
 
     http.end();
