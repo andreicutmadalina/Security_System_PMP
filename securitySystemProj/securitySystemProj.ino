@@ -20,6 +20,7 @@ int buttonPin = 6;
 int lastPressedTime = 0;
 int lastButtonState;
 int debounceTime = 20;
+int buzzer = 8 ;
 
 char hexaKeys[ROWS][COLS] = {
   {'1', '2', '3'},
@@ -29,7 +30,7 @@ char hexaKeys[ROWS][COLS] = {
 };
 
 byte rowPins[ROWS] = {13, 12, 11, 10};
-byte colPins[COLS] = {9, 8, 7};
+byte colPins[COLS] = {9, 5, 7};
 
 Keypad customKeypad = Keypad(makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS);
 
@@ -38,7 +39,12 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 void setup(){
   Serial.begin(9600);
   s.begin(9600);
+  
+  pinMode (buzzer, OUTPUT) ;
+  digitalWrite(buzzer, HIGH);
+ 
   pinMode(buttonPin, INPUT_PULLUP);
+  
   lcd.init(); 
   lcd.backlight();
 }
@@ -116,6 +122,13 @@ void enterPassword()
       lcd.clear();
       lcd.print("ALARM!");
       s.write(1); //cod 1 = cineva a incercat sa patrunda in casa
+
+      //alarm ---------------------
+      digitalWrite(buzzer, LOW);
+      delay (1000) ;
+      digitalWrite(buzzer, HIGH);
+      //--------------------------
+      
       delay(3000);
       wrong_count = 0;
     }
